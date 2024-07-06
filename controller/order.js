@@ -1,0 +1,60 @@
+require('dotenv').config();
+const Order = require('../model/order');
+
+
+
+const store_order = async (req , res) => {
+    const{productId,product_name,product_price,color,size,total_price,count,user_name,user_phoneNumber,user_city,user_address } =  req.body;
+
+    const emptyFields = ['productId', 'product_name', 'product_price', 'color', 'size', 'total_price', 'count', 'user_name', 'user_phoneNumber', 'user_city', 'user_address']
+        .filter(field => !req.body[field]);
+
+    if (emptyFields.length > 0) {
+        return res.status(400).json({ error: `The following fields are required: ${emptyFields.join(', ')}` });
+    }
+
+    const result = new Order({productId,product_name,product_price,color,size,total_price,count,user_name,user_phoneNumber
+        ,user_city,user_address,delivery_charge:count});
+
+    const saveData =await result.save();
+
+        res.status(200).json({ message: "Order stored successfully",data:saveData });
+        console.log(saveData);
+
+}
+
+const cash_on_delivery = async (req , res) => {
+    const orderId = req.body.orderId;
+   const result = await Order.findByIdAndUpdate(orderId,{cash_on_delivery:true});
+   console.log(result)
+   if(result){  
+    res.status(200).json({ message: 'Cash on Delivery Confirm ' });
+}else{
+    res.status(200).json({ message: 'Order Not' });
+}
+
+}
+
+const fetchOrder = async(req ,res) => {
+    const result = await Order.find();
+    if(result){
+        res.json({
+            message: 'Order fetched successfully',
+            success:true,
+            data:result
+        })
+    }else{
+        res.json({
+            message: 'Order Not fetched',
+            success:false,
+            })
+    }
+}
+
+
+
+module.exports = {
+    store_order,
+    cash_on_delivery,
+    fetchOrder
+}
