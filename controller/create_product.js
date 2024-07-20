@@ -30,13 +30,14 @@ const create_prodcut_api = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Unknown error', error: err });
       }
 
-      const { product_name, product_price, product_detail } = req.body;
+      const { product_name, product_price, product_detail ,product_quantity} = req.body;
       const product_picture = req.file.path; 
 
       const newProduct = await Product.create({
         product_name,
         product_price,
         product_detail,
+        product_quantity,
         product_picture,
       });
 
@@ -53,18 +54,38 @@ const fetch_product = async (req,res)=>{
     const product = await Product.find();
     res.json(product);
 }
-
-const delete_product = async(req , res) =>{
+const delete_product = async (req, res) => {
   const id = req.params.id;
-  const product = await Product.findByIdAndDelete(id);
-  if (!product) {
-    return res.status(404).json({ success: false, message: 'Product not found'
-      });
-      
-      }
-      res.json({ success: true, message: 'Product deleted successfully' });
+  try {
+    const product = await Product.findById(id);
 
-}
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    if (product.product_picture) {
+      const url = new URL(product.product_picture);
+      const pathSegments = url.pathname.split('/');
+      const public_id = pathSegments.slice(-2).join('/').split('.')[0];
+
+
+
+      await cloudinary.uploader.destroy(public_id, function (error, result) {
+        if (error) {
+          console.error('Error deleting image from Cloudinary:', error);
+        } else {
+          console.log('Cloudinary deletion result:', result);
+        }
+      });
+    }
+
+    await Product.findByIdAndDelete(id);
+
+    res.json({ success: true, message: 'Product and associated image deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
 
 const updatedProduct = async (req, res) => {
   const { id } = req.params;

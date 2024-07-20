@@ -48,13 +48,12 @@ const online_order = async (req , res) => {
             },
         ],
         mode:payment,
-        success_url: 'https://6454-39-61-38-54.ngrok-free.app/success',
-        cancel_url: 'https://6454-39-61-38-54.ngrok-free.app/cancel',
+        success_url: 'https://polybag-backend-de31d1cae078.herokuapp.com/success',
+        cancel_url: 'https://polybag-backend-de31d1cae078.herokuapp.com/cancel',
         metadata: {
           order_id: orderId,
       },
     });
-      console.log('price:', checkout.url);
     res.send(checkout.url);
 }
 

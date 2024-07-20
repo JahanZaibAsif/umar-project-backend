@@ -1,10 +1,14 @@
 require('dotenv').config();
 const Order = require('../model/order');
+const Product = require('../model/product');
 
 
 
-const store_order = async (req , res) => {
-    const{productId,product_name,product_price,color,size,total_price,count,user_name,user_phoneNumber,user_city,user_address } =  req.body;
+
+const store_order = async (req, res) => {
+    const {
+        productId, product_name, product_price, color, size, total_price, count, user_name, user_phoneNumber, user_city, user_address
+    } = req.body;
 
     const emptyFields = ['productId', 'product_name', 'product_price', 'color', 'size', 'total_price', 'count', 'user_name', 'user_phoneNumber', 'user_city', 'user_address']
         .filter(field => !req.body[field]);
@@ -13,15 +17,35 @@ const store_order = async (req , res) => {
         return res.status(400).json({ error: `The following fields are required: ${emptyFields.join(', ')}` });
     }
 
-    const result = new Order({productId,product_name,product_price,color,size,total_price,count,user_name,user_phoneNumber
-        ,user_city,user_address,delivery_charge:count});
+    try {
+        // Fetch the product by ID
+        const product = await Product.findById(productId);
 
-    const saveData =await result.save();
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
 
-        res.status(200).json({ message: "Order stored successfully",data:saveData });
-        console.log(saveData);
+        if (product.product_quantity < count) {
+            return res.status(400).json({ error: 'Not enough product quantity available' });
+        }
 
-}
+        product.product_quantity -= count;
+        await product.save();
+
+        const order = new Order({
+            productId, product_name, product_price, color, size, total_price, count, user_name, user_phoneNumber,
+            user_city, user_address, delivery_charge: count
+        });
+
+        const savedOrder = await order.save();
+
+        res.status(200).json({ message: "Order stored successfully", data: savedOrder });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while processing the order' });
+    }
+};
+
 
 const cash_on_delivery = async (req , res) => {
     const orderId = req.body.orderId;

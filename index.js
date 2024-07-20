@@ -17,12 +17,13 @@ app.post('/stripe/webhook', rawBodyMiddleware, async (req, res) => {
 
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+        console.log(event)
+
     } catch (err) {
         console.log(`⚠️  Webhook signature verification failed: ${err.message}`);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-
-    if (event.type === 'checkout.session.completed') {
+    if (event.type === 'checkout.session.async_payment_succeeded') {
         const session = event.data.object;
         await updateDatabase(session);
     }
