@@ -26,7 +26,7 @@ const store_order = async (req, res) => {
         }
 
         if (product.product_quantity < count) {
-            return res.status(400).json({ error: 'Not enough product quantity available' });
+            return res.status(400).json({ error: 'Quantity is less than your order' });
         }
 
         product.product_quantity -= count;
@@ -45,6 +45,7 @@ const store_order = async (req, res) => {
         res.status(500).json({ error: 'An error occurred while processing the order' });
     }
 };
+
 
 
 const cash_on_delivery = async (req , res) => {

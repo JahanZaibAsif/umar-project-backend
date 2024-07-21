@@ -40,7 +40,7 @@ router.get('/success', (req, res) => {
                 confirmButtonText: 'OK'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = 'http://localhost:3000'; // Redirect to the home page
+                    window.location.href = 'https://www.strongpackagings.com';
                 }
             });
         </script>
