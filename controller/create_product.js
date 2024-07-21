@@ -89,7 +89,7 @@ const delete_product = async (req, res) => {
 
 const updatedProduct = async (req, res) => {
   const { id } = req.params;
-  const { product_name, product_price, product_detail } = req.body;
+  const { product_name, product_price, product_detail ,product_quantity } = req.body;
   const product_picture = req.file;
 
   try {
@@ -103,8 +103,8 @@ const updatedProduct = async (req, res) => {
     product.product_name = product_name;
     product.product_price = product_price;
     product.product_detail = product_detail;
+    product.product_quantity = product_quantity;
 
-    // If a new picture is provided, handle image replacement
     if (product_picture) {
       // Delete the existing image from Cloudinary
       if (product.product_picture) {
